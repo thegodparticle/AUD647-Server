@@ -365,6 +365,31 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
 		}
 	});
 
+	// ===========================================
+    //  INSERT THIS: CLASS PULSE SYSTEM HANDLERS
+    // ===========================================
+
+    // 1. Allow simple joining for the Chat/Pulse system
+    // (Your existing code uses 'join_room', but the new client uses 'join')
+    socket.on('join', (data) => {
+        if (data && data.room) {
+            socket.join(data.room);
+            console.log(`${socket.id} joined pulse room: ${data.room}`);
+        }
+    });
+
+    // 2. Handle the Chat & Reactions Relay
+    socket.on('pulse_event', (data) => {
+        // Relay the message/reaction to everyone else in the room
+        if (data.room) {
+            socket.to(data.room).emit('pulse_event', data);
+        }
+    });
+
+    // ===========================================
+    //  END INSERT
+    // ===========================================
+
 	// Runs when client disconnects
 	socket.on('disconnect', () => {
 console.log(`${socket.id} disconnected`);
