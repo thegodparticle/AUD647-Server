@@ -26,8 +26,15 @@ else {
   server = https.createServer(credentials,app);
 }
 
-const io = socketio(server);
+/** const io = socketio(server); **/
 
+const io = socketio(server, {
+  cors: {
+    origin: "*",  // Allow connection from any URL (aud613.niyaziarslan.com, localhost, etc.)
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 
 /**
@@ -365,29 +372,27 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
 		}
 	});
 
-	// ===========================================
-    //  INSERT THIS: CLASS PULSE SYSTEM HANDLERS
+// ===========================================
+    //  NEW: CLASS PULSE SYSTEM LOGIC
     // ===========================================
 
-    // 1. Allow simple joining for the Chat/Pulse system
-    // (Your existing code uses 'join_room', but the new client uses 'join')
+    // 1. Simple Join for Chat/Pulse
     socket.on('join', (data) => {
+        // Just join the room ID sent from the client
         if (data && data.room) {
             socket.join(data.room);
             console.log(`${socket.id} joined pulse room: ${data.room}`);
         }
     });
 
-    // 2. Handle the Chat & Reactions Relay
+    // 2. Relay Chat & Reactions
     socket.on('pulse_event', (data) => {
-        // Relay the message/reaction to everyone else in the room
+        // Send to everyone else in the room
         if (data.room) {
             socket.to(data.room).emit('pulse_event', data);
         }
     });
-
-    // ===========================================
-    //  END INSERT
+    
     // ===========================================
 
 	// Runs when client disconnects
