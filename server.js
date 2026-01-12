@@ -376,7 +376,7 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
     //  NEW: CLASS PULSE SYSTEM LOGIC
     // ===========================================
 
-    function broadcastCount(room) {
+function broadcastCount(room) {
         // Get the room instance
         const roomSet = io.sockets.adapter.rooms.get(room);
         const count = roomSet ? roomSet.size : 0;
@@ -415,6 +415,8 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
             io.to(room).emit('room_count', count);
         });
     });
+
+}); 
 
     // ===========================================
 
