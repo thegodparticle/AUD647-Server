@@ -371,37 +371,55 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
 			if ( callback ) callback("Only hosts can make announcements");
 		}
 	});
-
-// ===========================================
+	
+	// ===========================================
     //  NEW: CLASS PULSE SYSTEM LOGIC
     // ===========================================
 
+
+
+    // Helper: Send user count to a specific room
+    function broadcastCount(room) {
+        // Get the room instance
+        const roomSet = io.sockets.adapter.rooms.get(room);
+        const count = roomSet ? roomSet.size : 0;
+        // Send to everyone in that room
+        io.to(room).emit('room_count', count);
+    }
+
     // 1. Simple Join for Chat/Pulse
     socket.on('join', (data) => {
-        // Just join the room ID sent from the client
         if (data && data.room) {
             socket.join(data.room);
             console.log(`${socket.id} joined pulse room: ${data.room}`);
+            
+            // Broadcast new count immediately
+            broadcastCount(data.room);
         }
     });
 
     // 2. Relay Chat & Reactions
     socket.on('pulse_event', (data) => {
-        // Send to everyone else in the room
         if (data.room) {
             socket.to(data.room).emit('pulse_event', data);
         }
     });
     
-    // ===========================================
+    // 3. Handle Disconnect (Update Counter)
+    socket.on('disconnecting', () => {
+        // 'disconnecting' fires BEFORE they leave, so we know which rooms they are in.
+        // We iterate through their rooms and update the count for the remaining users.
+        const rooms = Array.from(socket.rooms);
+        
+        rooms.forEach(room => {
+            // We calculate (current size - 1) because they are about to leave
+            const roomSet = io.sockets.adapter.rooms.get(room);
+            const count = roomSet ? roomSet.size - 1 : 0;
+            io.to(room).emit('room_count', count);
+        });
+    });
 
-	// Runs when client disconnects
-	socket.on('disconnect', () => {
-console.log(`${socket.id} disconnected`);
-		leaveAllRooms(socket.id);
-		deleteUser(socket.id);
-	});
-});
+    // ===========================================
 
 const PORT = process.env.PORT || 4433;
 
