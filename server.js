@@ -376,9 +376,6 @@ console.log(`${socket.id} makes announcement to "${recipient}"`, content);
     //  NEW: CLASS PULSE SYSTEM LOGIC
     // ===========================================
 
-
-
-    // Helper: Send user count to a specific room
     function broadcastCount(room) {
         // Get the room instance
         const roomSet = io.sockets.adapter.rooms.get(room);
