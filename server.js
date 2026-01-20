@@ -57,8 +57,6 @@ console.log("Authorize", authorise('$2a$05$hhgakVn1DWBfgfSwMihABeYToIBEiQGJ.ONa.
 
 const users = [];
 const rooms = [];
-// Store published lecture IDs (Start with none, or add defaults like '1.1')
-let publishedLectures = new Set(['1.1']);
 const hosts = [];
 const participants = [];
 
@@ -416,22 +414,6 @@ function broadcastCount(room) {
             const count = roomSet ? roomSet.size - 1 : 0;
             io.to(room).emit('room_count', count);
         });
-    });
-	// --- 4. PUBLISHING SYSTEM (New) ---
-
-    // Send current state to anyone who connects
-    socket.emit('published_state', Array.from(publishedLectures));
-
-    // Instructor: Publish a lecture
-    socket.on('publish_lecture', (id) => {
-        publishedLectures.add(id);
-        io.emit('published_state', Array.from(publishedLectures)); // Update everyone
-    });
-
-    // Instructor: Unpublish a lecture
-    socket.on('unpublish_lecture', (id) => {
-        publishedLectures.delete(id);
-        io.emit('published_state', Array.from(publishedLectures)); // Update everyone
     });
 
 }); 
